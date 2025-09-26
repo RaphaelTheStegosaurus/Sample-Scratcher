@@ -1,3 +1,28 @@
+const brushImage = new Image();
+brushImage.src = "./brushes/brush-04.svg";
+function setBrushImage(shapeId) {
+  console.log(shapeId);
+  switch (shapeId) {
+    case 1:
+      brushImage.src = "./brushes/brush-01.svg";
+      break;
+    case 2:
+      brushImage.src = "./brushes/brush-02.svg";
+      break;
+    case 3:
+      brushImage.src = "./brushes/brush-03.svg";
+      break;
+    case 4:
+      brushImage.src = "./brushes/brush-04.svg";
+      break;
+    case 5:
+      brushImage.src = "./brushes/brush-04.svg";
+      break;
+    default:
+      brushImage.src = "./brushes/brush-01.svg";
+      break;
+  }
+}
 document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("scratchCanvas");
   const container = canvas.parentElement;
@@ -7,8 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ctx.fillStyle = "#C0C0C0";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   // También puedes usar una imagen: ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  const brushImage = new Image();
-  brushImage.src = "./brushes/brush-04.svg";
+
   let isScratching = false;
 
   function getCorrectCoordinates(event) {
@@ -51,8 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function scratch(x, y) {
-    // const randomSize = Math.random() * 20 + 10;
-    // console.log(randomSize);
     ctx.globalCompositeOperation = "destination-out";
     ctx.drawImage(
       brushImage,
@@ -80,8 +102,5 @@ document.addEventListener("DOMContentLoaded", () => {
       canvas.style.display = "none";
       alert("You Win");
     }
-    // if (progress === 95) {
-    //   alert("Se Ha destapado todo");
-    // }
   }
 });
