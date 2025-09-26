@@ -2,19 +2,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("scratchCanvas");
   const container = canvas.parentElement;
   const ctx = canvas.getContext("2d");
-
-  // Configura el tamaño del canvas para que coincida con el contenedor
   canvas.width = container.offsetWidth;
   canvas.height = container.offsetHeight;
-
-  // Rellena el canvas con el color o imagen "opaca"
-  ctx.fillStyle = "#C0C0C0"; // Un gris para simular la capa de rascar
+  ctx.fillStyle = "#C0C0C0";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   // También puedes usar una imagen: ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
+  const brushImage = new Image();
+  brushImage.src = "./brushes/brush-04.svg";
   let isScratching = false;
 
-  // Eventos para PC (mouse)
+  function getCorrectCoordinates(event) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+    const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    return { x, y };
+  }
   canvas.addEventListener("mousedown", (e) => {
     isScratching = true;
     scratch(e.offsetX, e.offsetY);
@@ -25,41 +29,59 @@ document.addEventListener("DOMContentLoaded", () => {
       scratch(e.offsetX, e.offsetY);
     }
   });
-
   canvas.addEventListener("mouseup", () => {
     isScratching = false;
   });
-
-  // Eventos para dispositivos móviles (touch)
+  //[c] mobile device
   canvas.addEventListener("touchstart", (e) => {
+    e.preventDefault();
     isScratching = true;
-    e.preventDefault(); // Evita el desplazamiento de la página
-    const touch = e.touches[0];
-    scratch(
-      touch.clientX - canvas.offsetLeft,
-      touch.clientY - canvas.offsetTop
-    );
+    const { x, y } = getCorrectCoordinates(e);
+    scratch(x, y);
   });
-
   canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
     if (isScratching) {
-      e.preventDefault();
-      const touch = e.touches[0];
-      scratch(
-        touch.clientX - canvas.offsetLeft,
-        touch.clientY - canvas.offsetTop
-      );
+      const { x, y } = getCorrectCoordinates(e);
+      scratch(x, y);
     }
   });
-
   canvas.addEventListener("touchend", () => {
     isScratching = false;
   });
 
   function scratch(x, y) {
-    ctx.globalCompositeOperation = "destination-out"; // Borra en lugar de dibujar
+    // const randomSize = Math.random() * 20 + 10;
+    // console.log(randomSize);
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.drawImage(
+      brushImage,
+      x - brushImage.width / 2,
+      y - brushImage.height / 2
+    );
     ctx.beginPath();
-    ctx.arc(x, y, 20, 0, Math.PI * 2); // Círculo de 20px de radio
+    ctx.arc(x, y, 0, 0, Math.PI * 2);
     ctx.fill();
+    checkProgress();
+  }
+  function checkProgress() {
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let transparentPixels = 0;
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      if (imageData.data[i + 3] === 0) {
+        transparentPixels++;
+      }
+    }
+    const progress = (transparentPixels / (canvas.width * canvas.height)) * 100;
+    console.log(`Progreso de rascado: ${progress.toFixed(2)}%`);
+    //[ ] mejorar la experiencia al terminar
+    // Todo : ajustar por si hay pequenos espacios que no se alcanzan a ver
+    if (progress > 95) {
+      canvas.style.display = "none";
+      alert("You Win");
+    }
+    // if (progress === 95) {
+    //   alert("Se Ha destapado todo");
+    // }
   }
 });
