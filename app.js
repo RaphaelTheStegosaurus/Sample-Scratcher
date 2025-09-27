@@ -1,27 +1,45 @@
-const brushImage = new Image();
-brushImage.src = "./brushes/brush-04.svg";
+let activeBrushImage = new Image();
+activeBrushImage.src = "./brushes/brush-01.svg";
 function setBrushImage(shapeId) {
-  console.log(shapeId);
-  switch (shapeId) {
+  let shapeCode = parseInt(shapeId);
+  let newSrc = "./brushes/brush-01.svg";
+  switch (shapeCode) {
     case 1:
-      brushImage.src = "./brushes/brush-01.svg";
+      newSrc = "./brushes/brush-01.svg";
       break;
     case 2:
-      brushImage.src = "./brushes/brush-02.svg";
+      newSrc = "./brushes/brush-02.svg";
       break;
     case 3:
-      brushImage.src = "./brushes/brush-03.svg";
+      newSrc = "./brushes/brush-03.svg";
       break;
     case 4:
-      brushImage.src = "./brushes/brush-04.svg";
+      newSrc = "./brushes/brush-04.svg";
       break;
     case 5:
-      brushImage.src = "./brushes/brush-04.svg";
+      newSrc = "./brushes/brush-05.svg";
       break;
     default:
-      brushImage.src = "./brushes/brush-01.svg";
+      newSrc = "./brushes/brush-01.svg";
       break;
   }
+  if (activeBrushImage.src.endsWith(newSrc.substring(1))) {
+    console.log("El pincel ya está activo. No se requiere carga.");
+    return Promise.resolve();
+  }
+  const newBrush = new Image();
+  newBrush.src = newSrc;
+  return new Promise((resolve) => {
+    newBrush.onload = () => {
+      activeBrushImage = newBrush;
+      console.log(`Pincel actualizado a: ${newSrc}`);
+      resolve();
+    };
+    newBrush.onerror = () => {
+      console.error(`Error al cargar el pincel: ${newSrc}`);
+      resolve();
+    };
+  });
 }
 document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("scratchCanvas");
@@ -75,12 +93,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function scratch(x, y) {
+    const brush = activeBrushImage;
     ctx.globalCompositeOperation = "destination-out";
-    ctx.drawImage(
-      brushImage,
-      x - brushImage.width / 2,
-      y - brushImage.height / 2
-    );
+    ctx.drawImage(brush, x - brush.width / 2, y - brush.height / 2);
     ctx.beginPath();
     ctx.arc(x, y, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -103,4 +118,5 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("You Win");
     }
   }
+  setBrushImage(1);
 });
